@@ -1,10 +1,20 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Lib
-    ( someFunc
+    ( buildMarkdown
     ) where
 
-import CMark
+import CMark (commonmarkToHtml)
 import qualified Data.Text as T
+import qualified Data.Text.IO as TI
 
-someFunc :: T.Text -> IO ()
-someFunc = putStrLn . T.unpack . commonmarkToHtml []
+buildMarkdown :: FilePath -> IO ()
+buildMarkdown inPath = do
+  mdData <- TI.readFile inPath
+  let outPath = T.unpack $ rext "html" $ T.pack inPath
+  TI.writeFile outPath $ commonmarkToHtml [] mdData
+
+rext :: T.Text -> T.Text -> T.Text
+rext newExt filename = do
+  let basename = T.intercalate "." $ init $ T.splitOn "." filename
+  T.concat [basename, ".", newExt]
+

@@ -4,4 +4,4 @@ module Main where
 import Lib
 
 main :: IO ()
-main = someFunc "# heading 1"
+main = buildMarkdown "README.md"
