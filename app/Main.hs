@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Lib
+import Jenerator
 
 main :: IO ()
 main = buildMarkdown "README.md"
