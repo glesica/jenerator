@@ -1,8 +1,13 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Jenerator
-    ( 
-      Page(..),
-      buildMarkdown
+    ( Date(..)
+    , Page(..)
+    , buildMarkdown
+    , parseDate
+    , parseTags
+    , parseTitle
+    , replaceExt
+    , stripExt
     ) where
 
 import CMark (commonmarkToHtml)
@@ -32,7 +37,7 @@ parseTags :: String -> [String]
 parseTags = splitOn "_"
 
 parseTitle :: String -> String
-parseTitle = intercalate " " . splitOn "_"
+parseTitle = unwords . splitOn "_"
 
 buildMarkdown :: FilePath -> IO ()
 buildMarkdown inPath = do
@@ -40,8 +45,9 @@ buildMarkdown inPath = do
   let outPath = replaceExt "html" inPath
   TI.writeFile outPath $ commonmarkToHtml [] mdData
 
+stripExt :: FilePath -> String
+stripExt = intercalate "." . init . splitOn "."
+
 replaceExt :: String -> FilePath -> FilePath 
-replaceExt newExt filename = do
-  let basename = intercalate "." $ init $ splitOn "." filename
-  basename ++ "." ++ newExt
+replaceExt newExt filename = (stripExt filename) ++ "." ++ newExt
 
