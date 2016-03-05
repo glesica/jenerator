@@ -10,14 +10,29 @@ import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import qualified Data.Text.IO as TI
 
+data Date = Date
+  Int -- Year
+  Int -- Month
+  Int -- Day
+  deriving (Eq, Show)
+
 data Page = Page {
-  title :: String,
-  pubYear :: Int,
-  pubMonth :: Int,
-  pubDay :: Int,
+  filePath :: FilePath,
+  date :: Date,
   tags :: [String],
-  filePath :: FilePath
+  title :: String
 } deriving (Show)
+
+parseDate :: String -> Date
+parseDate dateStr = do
+  let year:month:day:_ = splitOn "-" dateStr
+  Date (read year :: Int) (read month :: Int) (read day :: Int)
+
+parseTags :: String -> [String]
+parseTags = splitOn "_"
+
+parseTitle :: String -> String
+parseTitle = intercalate " " . splitOn "_"
 
 buildMarkdown :: FilePath -> IO ()
 buildMarkdown inPath = do
