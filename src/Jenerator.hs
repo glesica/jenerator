@@ -2,18 +2,19 @@
 module Jenerator
     ( Date(..)
     , Page(..)
-    , buildMarkdown
+    , buildPage
+    , buildPageAtFilename
+    , pageFromFilename
     , parseDate
     , parseTags
     , parseTitle
-    , replaceExt
-    , stripExt
     ) where
 
 import CMark (commonmarkToHtml)
 import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import qualified Data.Text.IO as TI
+import System.FilePath.Posix
 
 data Date = Date
   Int -- Year
@@ -21,12 +22,32 @@ data Date = Date
   Int -- Day
   deriving (Eq, Show)
 
-data Page = Page {
-  filePath :: FilePath,
-  date :: Date,
-  tags :: [String],
-  title :: String
-} deriving (Show)
+data Page = Page
+  { srcPath :: FilePath
+  , date    :: Date
+  , tags    :: [String]
+  , title   :: String
+  } deriving (Show)
+
+buildPageAtFilename :: FilePath -> FilePath -> IO ()
+buildPageAtFilename destDir = buildPage destDir . pageFromFilename
+
+buildPage :: FilePath -> Page -> IO ()
+buildPage destDir page = do
+  let inPath = srcPath page
+  let outPath = destDir </> (slugifyTitle $ title page) ++ ".html"
+  srcData <- TI.readFile inPath
+  TI.writeFile outPath $ commonmarkToHtml [] srcData
+
+pageFromFilename :: FilePath -> Page
+pageFromFilename filename = do
+  let [tagStr, dateStr, titleStr] = splitOn "__" $ dropExtension filename
+  Page {
+    srcPath = filename,
+    date    = parseDate dateStr,
+    tags    = parseTags tagStr,
+    title   = parseTitle titleStr
+  }
 
 parseDate :: String -> Date
 parseDate dateStr = do
@@ -39,15 +60,6 @@ parseTags = splitOn "_"
 parseTitle :: String -> String
 parseTitle = unwords . splitOn "_"
 
-buildMarkdown :: FilePath -> IO ()
-buildMarkdown inPath = do
-  mdData <- TI.readFile inPath
-  let outPath = replaceExt "html" inPath
-  TI.writeFile outPath $ commonmarkToHtml [] mdData
-
-stripExt :: FilePath -> String
-stripExt = intercalate "." . init . splitOn "."
-
-replaceExt :: String -> FilePath -> FilePath 
-replaceExt newExt filename = (stripExt filename) ++ "." ++ newExt
+slugifyTitle :: String -> String
+slugifyTitle = intercalate "-" . words
 

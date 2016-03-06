@@ -4,4 +4,4 @@ module Main where
 import Jenerator
 
 main :: IO ()
-main = buildMarkdown "README.md"
+main = buildPageAtFilename "example/" "example/tag0_tag1__2016-03-05__Test_document.md"
