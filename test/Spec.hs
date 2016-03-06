@@ -53,3 +53,12 @@ main = hspec $ do
       let t = parseTitle "✔_✘"
       t `shouldBe` "✔ ✘"
 
+  describe "slugifyTitle" $ do
+    it "should slugify a on-word title" $ do
+      let s = slugifyTitle "title"
+      s `shouldBe` "title"
+
+    it "should slugify a longer title" $ do
+      let s = slugifyTitle "longer title"
+      s `shouldBe` "longer-title"
+

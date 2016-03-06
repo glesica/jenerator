@@ -1,19 +1,21 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE OverloadedStrings #-}
+
 module Jenerator
     ( Date(..)
     , Page(..)
-    , buildPage
-    , buildPageAtFilename
     , pageFromFilename
     , parseDate
     , parseTags
     , parseTitle
+    , slugifyTitle
     ) where
 
 import CMark (commonmarkToHtml)
+import Data.Data
 import Data.List (intercalate)
 import Data.List.Split (splitOn)
-import qualified Data.Text.IO as TI
+import Data.Typeable
 import System.FilePath.Posix
 
 data Date = Date
@@ -27,17 +29,7 @@ data Page = Page
   , date    :: Date
   , tags    :: [String]
   , title   :: String
-  } deriving (Show)
-
-buildPageAtFilename :: FilePath -> FilePath -> IO ()
-buildPageAtFilename destDir = buildPage destDir . pageFromFilename
-
-buildPage :: FilePath -> Page -> IO ()
-buildPage destDir page = do
-  let inPath = srcPath page
-  let outPath = destDir </> (slugifyTitle $ title page) ++ ".html"
-  srcData <- TI.readFile inPath
-  TI.writeFile outPath $ commonmarkToHtml [] srcData
+  } deriving (Show, Data, Typeable)
 
 pageFromFilename :: FilePath -> Page
 pageFromFilename filename = do
