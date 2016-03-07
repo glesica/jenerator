@@ -30,6 +30,14 @@ main = hspec $ do
       (tags p) `shouldBe` ["tag0"]
       (title p) `shouldBe` "long title"
 
+  describe "defaultSite" $
+    it "should return a valid site config" $ do
+      let s = defaultSite
+      (tmplPath s) `shouldBe` "template.html"
+      (pagesPath s) `shouldBe` "pages"
+      (staticPath s) `shouldBe` "static"
+      (buildPath s) `shouldBe` "build"
+
   describe "parseDate" $ do
     it "should parse a zero-padded date" $ do
       let d = parseDate "2000-01-02"

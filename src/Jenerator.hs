@@ -4,6 +4,8 @@
 module Jenerator
     ( Date(..)
     , Page(..)
+    , Site(..)
+    , defaultSite
     , pageFromFilename
     , parseDate
     , parseTags
@@ -11,7 +13,6 @@ module Jenerator
     , slugifyTitle
     ) where
 
-import CMark (commonmarkToHtml)
 import Data.Data
 import Data.List (intercalate)
 import Data.List.Split (splitOn)
@@ -22,13 +23,20 @@ data Date = Date
   Int -- Year
   Int -- Month
   Int -- Day
-  deriving (Eq, Show)
+  deriving (Eq, Show, Data, Typeable)
 
 data Page = Page
   { srcPath :: FilePath
   , date    :: Date
   , tags    :: [String]
   , title   :: String
+  } deriving (Show, Data, Typeable)
+
+data Site = Site
+  { tmplPath   :: FilePath
+  , pagesPath  :: FilePath
+  , staticPath :: FilePath
+  , buildPath  :: FilePath
   } deriving (Show, Data, Typeable)
 
 pageFromFilename :: FilePath -> Page
@@ -39,6 +47,14 @@ pageFromFilename filename = do
     date    = parseDate dateStr,
     tags    = parseTags tagStr,
     title   = parseTitle titleStr
+  }
+
+defaultSite :: Site
+defaultSite = Site {
+    tmplPath = "template.html",
+    pagesPath = "pages",
+    staticPath = "static",
+    buildPath = "build"
   }
 
 parseDate :: String -> Date
