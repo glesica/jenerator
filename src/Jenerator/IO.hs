@@ -27,7 +27,7 @@ buildPage :: Site -> Page -> IO ()
 buildPage site page = do
   putStr $ "Building page: " ++ title page ++ "."
   let inPath = pagesPath site </> srcPath page
-  let outPath = buildPath site </> slugifyTitle $ title page ++ ".html"
+  let outPath = buildPath site </> (slugifyTitle $ title page) ++ ".html"
   srcData <- TI.readFile inPath
   TI.writeFile outPath $ commonmarkToHtml [] srcData
   putStr " Done."
