@@ -62,7 +62,7 @@ main = hspec $ do
       t `shouldBe` "✔ ✘"
 
   describe "slugifyTitle" $ do
-    it "should slugify a on-word title" $ do
+    it "should slugify a one-word title" $ do
       let s = slugifyTitle "title"
       s `shouldBe` "title"
 
