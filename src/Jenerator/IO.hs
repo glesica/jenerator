@@ -5,8 +5,6 @@ module Jenerator.IO
     , buildSite
     ) where
 
-import CMark (commonmarkToHtml)
-import qualified Data.Text.IO as TI
 import System.Directory (getDirectoryContents)
 import System.FilePath.Posix
 import Jenerator
@@ -27,9 +25,11 @@ buildPage :: Site -> Page -> IO ()
 buildPage site page = do
   putStr $ "Building page: " ++ title page ++ "."
   let inPath = pagesPath site </> srcPath page
-  let outPath = buildPath site </> (slugifyTitle $ title page) ++ ".html"
-  srcData <- TI.readFile inPath
-  TI.writeFile outPath $ commonmarkToHtml [] srcData
+  let outPath = buildPath site </> slugifyTitle (title page) ++ ".html"
+  inData <- readFile inPath
+  tmplData <- readFile $ pageTmplPath site
+  let outData = renderPage tmplData page
+  writeFile outPath outData
   putStr " Done."
 
 -- Add this because it isn't in the version of directory we're using yet

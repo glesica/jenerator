@@ -10,14 +10,17 @@ module Jenerator
     , parseDate
     , parseTags
     , parseTitle
+    , renderPage
     , slugifyTitle
     ) where
 
+import Data.Aeson
 import Data.Data
 import Data.List (intercalate)
 import Data.List.Split (splitOn)
 import Data.Typeable
 import System.FilePath.Posix
+import Text.Pandoc.Templates
 
 data Date = Date
   Int -- Year
@@ -30,13 +33,25 @@ data Page = Page
   , date    :: Date
   , tags    :: [String]
   , title   :: String
+  , content :: String
   } deriving (Show, Data, Typeable)
 
+instance ToJSON Page where
+  toJSON e = do
+    let Date year month day = date e
+    object [ "srcPath" .= srcPath e
+           , "date" .= object [ "year" .= year
+                              , "month" .= month
+                              , "day" .= day ]
+           , "tags" .= tags e
+           , "title" .= title e ]
+
 data Site = Site
-  { tmplPath   :: FilePath
-  , pagesPath  :: FilePath
-  , staticPath :: FilePath
-  , buildPath  :: FilePath
+  { pageTmplPath  :: FilePath
+  , indexTmplPath :: FilePath
+  , pagesPath     :: FilePath
+  , staticPath    :: FilePath
+  , buildPath     :: FilePath
   } deriving (Show, Data, Typeable)
 
 pageFromFilename :: FilePath -> Page
@@ -46,16 +61,31 @@ pageFromFilename filename = do
     srcPath = filename,
     date    = parseDate dateStr,
     tags    = parseTags tagStr,
-    title   = parseTitle titleStr
+    title   = parseTitle titleStr,
+    content = ""
+  }
+
+addContentToPage :: Page -> String -> Page
+addContentToPage page content =
+  Page {
+    srcPath = srcPath page,
+    date    = date page,
+    tags    = tags page,
+    title   = title page,
+    content = content
   }
 
 defaultSite :: Site
 defaultSite = Site {
-    tmplPath = "template.html",
+    pageTmplPath = "page.html",
+    indexTmplPath = "index.html",
     pagesPath = "pages",
     staticPath = "static",
     buildPath = "build"
   }
+
+renderPage :: String -> Page -> String
+renderPage = renderTemplate'
 
 parseDate :: String -> Date
 parseDate dateStr = do
